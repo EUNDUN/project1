@@ -1,0 +1,53 @@
+# Unity generated folders
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+/MemoryCaptures/
+
+# Unity generated files
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.csproj
+*.sln
+*.slnx
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Unity crash reports
+sysinfo.txt
+
+# Unity template/recovery leftovers
+/Assets/_Recovery/
+/Assets/_Recovery.meta
+/Assets/TutorialInfo/
+/Assets/TutorialInfo.meta
+/Assets/Readme.asset
+/Assets/Readme.asset.meta
+/Assets/New Folder/
+/Assets/New Folder.meta
+
+# Builds and packages
+*.apk
+*.aab
+*.unitypackage
+
+# Keep Unity source assets, scenes, packages, and project settings tracked.
