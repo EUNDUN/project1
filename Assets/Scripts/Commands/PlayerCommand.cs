@@ -10,5 +10,6 @@ namespace Game.Commands
         public Vector2 LookInput;
         public bool JumpPressed;
         public bool CrouchHeld;
+        public bool AttackPressed;
     }
 }

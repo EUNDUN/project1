@@ -16,9 +16,10 @@ namespace Game.Input
                 LookInput = new Vector2(
                     UnityEngine.Input.GetAxis("Mouse X"),
                     UnityEngine.Input.GetAxis("Mouse Y")),
-                JumpPressed = UnityEngine.Input.GetButtonDown("Jump"),
-                CrouchHeld = UnityEngine.Input.GetKey(KeyCode.LeftControl)
-                          || UnityEngine.Input.GetKey(KeyCode.C)
+                JumpPressed   = UnityEngine.Input.GetButtonDown("Jump"),
+                CrouchHeld    = UnityEngine.Input.GetKey(KeyCode.LeftControl)
+                             || UnityEngine.Input.GetKey(KeyCode.C),
+                AttackPressed = UnityEngine.Input.GetButtonDown("Fire1")
             };
         }
     }

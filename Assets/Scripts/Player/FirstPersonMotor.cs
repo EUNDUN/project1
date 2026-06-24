@@ -26,6 +26,13 @@ namespace Game.Player
             ApplyMovement(cmd.MoveInput);
         }
 
+        // Called by RespawnController after teleport so stale velocity does not jerk on first Tick.
+        public void ResetState()
+        {
+            _verticalVelocity  = 0f;
+            _entity.IsGrounded = false;
+        }
+
         void HandleCrouch(bool crouchHeld)
         {
             if (_entity.IsCrouching == crouchHeld) return;

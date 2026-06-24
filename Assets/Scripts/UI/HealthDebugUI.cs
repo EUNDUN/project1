@@ -9,8 +9,9 @@ namespace Game.UI
     {
         public HealthComponent target;
 
-        private float _currentHp;
-        private float _maxHp;
+        private float  _currentHp;
+        private float  _maxHp;
+        private string _hpText = "";
         private UnityEngine.Camera _mainCam;
 
         void Start()
@@ -19,6 +20,7 @@ namespace Game.UI
             _mainCam   = UnityEngine.Camera.main;
             _currentHp = target.CurrentHp;
             _maxHp     = target.MaxHp;
+            _hpText    = BuildHpText(_currentHp, _maxHp);
             target.OnHealthChanged += HandleHealthChanged;
         }
 
@@ -32,6 +34,7 @@ namespace Game.UI
         {
             _currentHp = current;
             _maxHp     = max;
+            _hpText    = BuildHpText(current, max);
         }
 
         void OnGUI()
@@ -41,8 +44,9 @@ namespace Game.UI
             Vector3 screen = _mainCam.WorldToScreenPoint(target.transform.position + Vector3.up * 2.5f);
             if (screen.z < 0f) return;
 
-            GUI.Label(new Rect(screen.x - 50f, Screen.height - screen.y - 15f, 100f, 25f),
-                      $"HP {_currentHp:F0} / {_maxHp:F0}");
+            GUI.Label(new Rect(screen.x - 50f, Screen.height - screen.y - 15f, 100f, 25f), _hpText);
         }
+
+        static string BuildHpText(float current, float max) => $"HP {current:F0} / {max:F0}";
     }
 }
