@@ -16,6 +16,7 @@ namespace Game.Player
         private FirstPersonMotor _motor;
         private FirstPersonCamera _fpsCamera;
         private BasicAttackController _attack;
+        private AbilityController _ability;
         private HealthComponent _playerHealth;
         private bool _cursorLocked;
         private bool _isDead;
@@ -25,10 +26,11 @@ namespace Game.Player
             _inputReader = GetComponent<PlayerInputReader>();
             _fpsCamera   = GetComponent<FirstPersonCamera>();
             _attack      = GetComponent<BasicAttackController>();
+            _ability     = GetComponent<AbilityController>();
             _motor       = playerEntity != null ? playerEntity.GetComponent<FirstPersonMotor>() : null;
 
             if (playerEntity == null || _inputReader == null || _motor == null
-                || _fpsCamera == null || _attack == null)
+                || _fpsCamera == null || _attack == null || _ability == null)
             {
                 Debug.LogError("[LocalPlayerController] Missing required component or reference. Disabling.", this);
                 enabled = false;
@@ -68,9 +70,19 @@ namespace Game.Player
             // Movement and attack are blocked while dead.
             if (!_isDead)
             {
-                if (_cursorLocked)
-                    _attack.Tick(cmd);
-                _motor.Tick(cmd);
+                bool stunned = _playerHealth != null && _playerHealth.IsStunned;
+                if (_cursorLocked && !stunned)
+                {
+                    if (!_ability.ShouldBlockBasicAttack)
+                        _attack.Tick(cmd);
+                    _ability.Tick(cmd);
+                }
+                // Stunned: zero movement/jump so gravity still applies via motor;
+                // camera look input is preserved (character is frozen, not blind).
+                Vector3 dashVel = stunned ? Vector3.zero : _ability.DashVelocity;
+                if (stunned)
+                    cmd = new PlayerCommand { LookInput = cmd.LookInput };
+                _motor.Tick(cmd, dashVel);
             }
         }
 

@@ -8,15 +8,17 @@ namespace Game.Bot
     // The enemies array is injected once at startup by GameBootstrap — no per-frame scene search.
     public class BotController : MonoBehaviour
     {
-        public GameConfig config;
+        public GameConfig        config;
         public HealthComponent   botHealth;
         public HealthComponent[] enemies;   // set by GameBootstrap.WireEnemyLists()
 
         private CharacterController _cc;
-        private float _attackCooldown;
-        private float _verticalVelocity;
-        private float _sqDetectRange;
-        private float _sqAttackRange;
+        private float           _attackCooldown;
+        private float           _verticalVelocity;
+        private float           _sqDetectRange;
+        private float           _sqAttackRange;
+        private ClassAttackData _attackData;
+        private bool            _isArcher;
 
         void Start()
         {
@@ -29,8 +31,14 @@ namespace Game.Bot
                 return;
             }
 
-            _sqDetectRange = config.botDetectRange * config.botDetectRange;
-            _sqAttackRange = config.botAttackRange * config.botAttackRange;
+            _attackData = config.GetAttackData(botHealth.CombatClass);
+            _isArcher   = botHealth.CombatClass == CombatClass.Archer;
+
+            // Archer uses projectile range (30 m); other classes use ClassAttackData.Range.
+            float attackRange = _isArcher ? config.archerBasicProjectileRange : _attackData.Range;
+            float detectRange = Mathf.Max(config.botDetectRange, attackRange + 1f);
+            _sqDetectRange = detectRange * detectRange;
+            _sqAttackRange = attackRange * attackRange;
 
             botHealth.OnRespawned += HandleRespawned;
         }
@@ -44,16 +52,28 @@ namespace Game.Bot
         {
             if (botHealth.IsDead) return;
 
-            if (_cc.isGrounded && _verticalVelocity < 0f)
+            float impulse = botHealth.ConsumeLaunchImpulse();
+            if (impulse > 0f)
+                _verticalVelocity = impulse; // launch — gravity decelerates from here
+            else if (_cc.isGrounded && _verticalVelocity < 0f)
                 _verticalVelocity = -2f;
             _verticalVelocity += config.gravity * Time.deltaTime;
 
             Vector3 vertMotion = new Vector3(0f, _verticalVelocity, 0f);
+            Vector3 kb         = botHealth.KnockbackVelocity;
+            Vector3 pull       = botHealth.PullVelocity;      // blackhole / zone pull (horizontal)
+
+            // Stunned: gravity + knockback + pull — voluntary movement and attack are suppressed.
+            if (botHealth.IsStunned)
+            {
+                _cc.Move((vertMotion + kb + pull) * Time.deltaTime);
+                return;
+            }
 
             HealthComponent target = FindNearestAliveEnemy();
             if (target == null)
             {
-                _cc.Move(vertMotion * Time.deltaTime);
+                _cc.Move((vertMotion + kb + pull) * Time.deltaTime);
                 return;
             }
 
@@ -67,37 +87,61 @@ namespace Game.Bot
                 {
                     toTarget.Normalize();
                     transform.rotation = Quaternion.LookRotation(toTarget);
-                    _cc.Move((toTarget * config.botMoveSpeed + vertMotion) * Time.deltaTime);
+                    float moveSpeedMult = botHealth.MoveSpeedMultiplier * botHealth.SelfMoveSpeedMultiplier;
+                    _cc.Move((toTarget * config.botMoveSpeed * moveSpeedMult + vertMotion + kb + pull) * Time.deltaTime);
                 }
                 else
                 {
-                    _cc.Move(vertMotion * Time.deltaTime);
+                    _cc.Move((vertMotion + kb + pull) * Time.deltaTime);
                 }
             }
             else
             {
-                _cc.Move(vertMotion * Time.deltaTime);
+                _cc.Move((vertMotion + kb + pull) * Time.deltaTime);
             }
 
             _attackCooldown = Mathf.Max(0f, _attackCooldown - Time.deltaTime);
-            if (sqDist <= _sqAttackRange && _attackCooldown <= 0f)
+            if (sqDist <= _sqAttackRange && _attackCooldown <= 0f && target.IsTargetable)
             {
-                _attackCooldown = config.botAttackCooldown;
-                var info = new DamageInfo
-                {
-                    BaseDamage = config.botAttackDamage,
-                    SourceTeam = botHealth.Team,
-                    SourceId   = gameObject.name
-                };
-                target.TakeDamage(info);
+                // eye-level origin; target torso centre avoids overshooting the head.
+                Vector3 origin       = transform.position + Vector3.up * (config.standHeight * 0.8f);
+                Vector3 targetCenter = target.transform.position + Vector3.up * (config.standHeight * 0.5f);
 
-                if (config.debugCombatLogs)
-                    Debug.Log($"[Bot] {name} -> {target.name}  HP {target.CurrentHp:F0}/{target.MaxHp:F0}");
+                if (_isArcher)
+                {
+                    _attackCooldown = config.archerBasicProjectileCooldown;
+                    Vector3 dir = targetCenter - origin;
+                    if (dir.sqrMagnitude < 0.01f) return;
+                    ArcherBasicProjectile.Spawn(botHealth, origin, dir.normalized, config, ArcherShotType.Basic);
+                }
+                else
+                {
+                    _attackCooldown = _attackData.Cooldown;
+                    Vector3 rawDir = targetCenter - origin;
+                    if (rawDir.sqrMagnitude < 0.01f) return;
+
+                    if (!AttackResolver.TryHit(origin, rawDir.normalized, _attackData.Range,
+                                                botHealth.Team, config.attackLayerMask,
+                                                out HealthComponent hit))
+                        return;
+
+                    var info = new DamageInfo
+                    {
+                        BaseDamage = _attackData.Damage,
+                        SourceTeam = botHealth.Team,
+                        SourceId   = gameObject.name
+                    };
+                    hit.TakeDamage(info);
+
+                    if (config.debugCombatLogs)
+                        Debug.Log($"[Bot] {name} -> {hit.name}  HP {hit.CurrentHp:F0}/{hit.MaxHp:F0}");
+                }
             }
         }
 
         // Iterates a small fixed array — O(N) over enemies count, never searches the scene.
         // Uses sqrMagnitude to avoid sqrt in the comparison loop.
+        // IsTargetable = !IsDead && !IsStealthed; stealthed characters are never picked.
         HealthComponent FindNearestAliveEnemy()
         {
             HealthComponent nearest  = null;
@@ -106,7 +150,7 @@ namespace Game.Bot
             for (int i = 0; i < enemies.Length; i++)
             {
                 HealthComponent e = enemies[i];
-                if (e == null || e.IsDead) continue;
+                if (e == null || !e.IsTargetable) continue;
 
                 float sqDst = (transform.position - e.transform.position).sqrMagnitude;
                 if (sqDst < minSqDst)

@@ -7,5 +7,7 @@
         public float BaseDamage;
         public Team  SourceTeam;
         public string SourceId;
+        // When true, bypasses CharacterStats.CalculateFinalDamage (flat armor reduction ignored).
+        public bool  IgnoreArmor;
     }
 }
