@@ -18,6 +18,8 @@ namespace Game.Combat
         private float _nextSpawnTime;
         private float _selfDestructTime;
 
+        private static readonly RaycastHit[] s_groundHits = new RaycastHit[4];
+
         public void Init(Team ownerTeam, HealthComponent ownerHealth, GameConfig config, Vector3 launchPos)
         {
             _ownerTeam   = ownerTeam;
@@ -63,6 +65,9 @@ namespace Game.Combat
             float angle = Random.value * (2f * Mathf.PI);
             var   offset = new Vector3(Mathf.Cos(angle) * r, 0f, Mathf.Sin(angle) * r);
             Vector3 impactPos = transform.position + offset;
+            // Per-meteor ground Y correction: each random XZ may sit at a different terrain height.
+            if (TryFindGroundY(impactPos, out float groundY))
+                impactPos.y = groundY;
 
             // Meteor starts at the orb explosion point and arcs outward to the impact point.
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -74,6 +79,25 @@ namespace Game.Combat
 
             var proj = go.AddComponent<MageMeteorProjectile>();
             proj.Init(_ownerTeam, _ownerHealth, _config, impactPos);
+        }
+
+        private static bool TryFindGroundY(Vector3 xzPos, out float groundY)
+        {
+            Vector3 origin = xzPos + Vector3.up * 20f;
+            int count = Physics.RaycastNonAlloc(
+                origin, Vector3.down, s_groundHits, 40f, ~0, QueryTriggerInteraction.Ignore);
+            groundY = xzPos.y;
+            float closest = float.MaxValue;
+            bool  found   = false;
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit h  = s_groundHits[i];
+                HealthComponent hc = h.collider.GetComponent<HealthComponent>();
+                if (hc == null) hc = h.collider.GetComponentInParent<HealthComponent>();
+                if (hc != null) continue;
+                if (h.distance < closest) { closest = h.distance; groundY = h.point.y; found = true; }
+            }
+            return found;
         }
     }
 }

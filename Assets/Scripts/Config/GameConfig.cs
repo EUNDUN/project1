@@ -105,6 +105,11 @@ namespace Game.Config
         public float warriorFMoveSpeedMultiplier = 0.5f;  // move speed multiplier during cast
         public float warriorFFinalKnockback      = 1.5f;  // knockback on final tick (m/s)
 
+        [Header("Warrior — RC Dash Impact")]
+        public float warriorDashImpactRadius      = 1.2f; // overlap sphere radius for enemy detection (m)
+        public float warriorDashImpactLaunchSpeed = 6.0f; // upward impulse applied to hit targets (m/s)
+        public float warriorDashImpactDamage      = 0f;   // bonus damage on impact (0 = no damage, launch only)
+
         [Header("Rogue — Dash")]
         public float rogueDashDistance = 10f;
         public float rogueDashDuration = 0.35f;
@@ -166,15 +171,14 @@ namespace Game.Config
         [Header("Rogue — Stealth / Backstab (R)")]
         public float rogueStealthDuration            = 5f;    // stealth window (s)
         public float rogueStealthMoveSpeedMultiplier = 2f;    // movement speed while stealthed
-        public float rogueStealthRevealOnHitDuration = 1f;    // reveal window when hit during stealth (s)
         public float rogueBackstabBonusDamage        = 30f;   // fixed bonus damage when attacking from behind while stealthed
         public float rogueBackstabAngle              = 90f;   // total rear cone angle for backstab (45 deg each side of directly-behind)
 
         [Header("Archer — Basic Projectile")]
         public float archerBasicProjectileDamage   = 5f;
-        public float archerBasicProjectileCooldown = 0.5f;
+        public float archerBasicProjectileCooldown = 0.25f;
         public float archerBasicProjectileRange    = 30f;
-        public float archerBasicProjectileSpeed    = 80f;
+        public float archerBasicProjectileSpeed    = 50f;
         public float archerBasicProjectileRadius   = 0.18f;
 
         [Header("Archer — Rapid Fire (RC)")]
@@ -231,7 +235,7 @@ namespace Game.Config
         public int   mageFireballMaxAmmo          = 15;    // max ammo capacity
         public float mageFireballRechargeInterval = 2.0f; // seconds per 1 ammo recharge
         public float mageFireballFireInterval     = 0.2f; // minimum seconds between shots
-        public float mageFireballSpeed            = 18f;  // m/s
+        public float mageFireballSpeed            = 30f;  // m/s
         public float mageFireballRange            = 20f;  // max travel distance (m)
         public float mageFireballDamage           = 6f;
         public int   mageBigFireballEvery         = 5;    // every Nth shot is a big fireball
@@ -302,6 +306,48 @@ namespace Game.Config
         public float mageTeleportRecastWindow       = 0.5f;   // window to trigger 2nd teleport (s)
         public int   mageTeleportMaxCharges         = 2;      // consecutive teleports per cooldown cycle
         public float mageTeleportPassthroughDuration = 0.15f; // post-teleport character passthrough (s)
+
+        [Header("Visual - First Person Weapon / Warrior")]
+        public Vector3 warriorWeaponViewLocalPosition = new Vector3(0.45f, -0.35f, 0.75f);
+        public Vector3 warriorWeaponViewLocalEuler    = new Vector3(10f, 180f, 0f);
+        public float warriorWeaponViewScale = 0.015f;
+
+        [Header("Visual - First Person Weapon / Archer")]
+        public Vector3 archerWeaponViewLocalPosition = new Vector3(0.45f, -0.35f, 0.75f);
+        public Vector3 archerWeaponViewLocalEuler    = new Vector3(10f, 180f, 0f);
+        public float archerWeaponViewScale  = 0.0025f;
+
+        [Header("Visual - First Person Weapon / Rogue")]
+        public Vector3 rogueWeaponViewLocalPosition = new Vector3(0.45f, -0.35f, 0.75f);
+        public Vector3 rogueWeaponViewLocalEuler    = new Vector3(10f, 180f, 0f);
+        public float rogueWeaponViewScale   = 0.02f;
+
+        [Header("Visual - First Person Weapon / Mage")]
+        public Vector3 mageWeaponViewLocalPosition = new Vector3(0.45f, -0.35f, 0.75f);
+        public Vector3 mageWeaponViewLocalEuler    = new Vector3(10f, 180f, 0f);
+        public float mageWeaponViewScale    = 0.01f;
+
+        public bool debugLiveUpdateWeaponView = true;
+
+        [Header("Visual - First Person Weapon Motion")]
+        public bool  weaponViewMotionEnabled = true;
+        public float weaponViewIdleBobSpeed = 1.6f;
+        public float weaponViewIdleBobAmount = 0.012f;
+        public float weaponViewMoveBobSpeed = 8.0f;
+        public float weaponViewMoveBobXAmount = 0.035f;
+        public float weaponViewMoveBobYAmount = 0.045f;
+        public float weaponViewLookSwayAmount = 0.012f;
+        public float weaponViewLookSwayRotation = 2.5f;
+        public float weaponViewSwingDuration = 0.28f;
+        public float weaponViewSwingPositionAmount = 0.16f;
+        public float weaponViewSwingRotationAmount = 55f;
+        public float weaponViewGunRecoilDuration = 0.12f;
+        public float weaponViewGunRecoilPositionAmount = 0.10f;
+        public float weaponViewGunRecoilRotationAmount = 9f;
+        public bool  cameraViewBobEnabled = true;
+        public float cameraViewBobAmount = 0.035f;
+        public float cameraViewBobSideAmount = 0.018f;
+        public float cameraViewBobRollAmount = 0.8f;
 
         [Header("Ability — Class Cooldowns")]
         public ClassAbilityConfig warriorAbility = new ClassAbilityConfig { RightClickCooldown = 15f, QCooldown = 8f, ECooldown = 14f, ZCooldown = 18f, FCooldown = 12f, RCooldown = 30f };

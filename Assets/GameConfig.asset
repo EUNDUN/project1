@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -46,6 +46,51 @@ MonoBehaviour:
     m_Bits: 4294967295
   warriorDashDistance: 20
   warriorDashDuration: 0.5
+  warriorQHit1Delay: 0.05
+  warriorQHit1Damage: 15
+  warriorQHit2Damage: 25
+  warriorQRange: 3.75
+  warriorQAngle: 120
+  warriorQHit2Range: 6
+  warriorQHit2Angle: 160
+  warriorQLaunchSpeed: 10
+  warriorQRiseForward: 1.5
+  warriorQRiseHeight: 3
+  warriorQRiseDuration: 0.15
+  warriorQFallSpeed: 14
+  warriorQFallForwardSpeed: 4
+  warriorQMaxFallDuration: 3
+  warriorGuardDuration: 4
+  warriorGuardDamageMultiplier: 0.5
+  warriorGuardMoveSpeedMultiplier: 0.7
+  warriorZRetreatDistance: 6
+  warriorZRetreatDuration: 0.35
+  warriorZWaveDelay: 0.5
+  warriorZWaveArmSpan: 4
+  warriorZWaveWidth: 1.8
+  warriorZWaveLength: 12
+  warriorZWaveDuration: 0.45
+  warriorZWaveDamage: 15
+  warriorZWaveKnockback: 1.5
+  warriorRCastTime: 2
+  warriorRRiseDuration: 1.9
+  warriorRDropDuration: 0.1
+  warriorRRiseHeight: 5
+  warriorRAreaSize: 15
+  warriorRAreaHeight: 5
+  warriorRStunDuration: 3
+  warriorRSwordScaleMultiplier: 10
+  warriorFDuration: 2
+  warriorFDamageInterval: 0.5
+  warriorFVisualInterval: 0.1
+  warriorFDamage: 5
+  warriorFFinalDamage: 10
+  warriorFRadius: 3.5
+  warriorFMoveSpeedMultiplier: 0.5
+  warriorFFinalKnockback: 1.5
+  warriorDashImpactRadius: 1.2
+  warriorDashImpactLaunchSpeed: 6
+  warriorDashImpactDamage: 0
   rogueDashDistance: 10
   rogueDashDuration: 0.35
   rogueDashRiftDamage: 10
@@ -55,10 +100,14 @@ MonoBehaviour:
   rogueDashRiftCount: 3
   rogueDashRiftWidth: 2
   rogueDashRiftHeight: 2
-  rogueQDamage: 15
-  rogueQRange: 5
-  rogueQAngle: 90
-  rogueQVisualDuration: 0.15
+  rogueQZoneSize: 3
+  rogueQTravelDistance: 3
+  rogueQTravelDuration: 0.3
+  rogueQZoneDuration: 4
+  rogueQDamagePerSecond: 5
+  rogueQTickInterval: 0.5
+  rogueQSlowMultiplier: 0.7
+  rogueQSlowDuration: 1.5
   rogueQMaxCharges: 2
   rogueQCastLockout: 1
   rogueEDamage: 10
@@ -90,13 +139,12 @@ MonoBehaviour:
   rogueShadowSlashStep3MoveSpeedDuration: 2
   rogueStealthDuration: 5
   rogueStealthMoveSpeedMultiplier: 2
-  rogueStealthRevealOnHitDuration: 1
   rogueBackstabBonusDamage: 30
   rogueBackstabAngle: 90
   archerBasicProjectileDamage: 5
-  archerBasicProjectileCooldown: 0.5
+  archerBasicProjectileCooldown: 0.25
   archerBasicProjectileRange: 30
-  archerBasicProjectileSpeed: 80
+  archerBasicProjectileSpeed: 50
   archerBasicProjectileRadius: 0.18
   archerRapidFireDuration: 3
   archerRapidFireMoveSpeedMultiplier: 1.3
@@ -136,6 +184,17 @@ MonoBehaviour:
   archerFSlowDuration: 0.4
   archerFMoveSpeedMultiplier: 0.8
   archerFSpreadAngle: 4
+  mageFireballMaxAmmo: 15
+  mageFireballRechargeInterval: 2
+  mageFireballFireInterval: 0.2
+  mageFireballSpeed: 30
+  mageFireballRange: 20
+  mageFireballDamage: 6
+  mageBigFireballEvery: 5
+  mageBigFireballDamage: 15
+  mageBigFireballScale: 2.5
+  mageFireballRadius: 0.25
+  mageBigFireballRadius: 0.65
   mageBigFireballStunDuration: 0.5
   mageBigFireballKnockbackSpeed: 4
   mageBigFireballKnockbackDuration: 0.25
@@ -171,6 +230,34 @@ MonoBehaviour:
   mageLaserKnockbackSpeed: 5
   mageLaserVisualRadius: 1
   mageLaserMoveSpeedMultiplier: 0.3
+  mageBlackholeCastTime: 1
+  mageBlackholeDuration: 5
+  mageBlackholeRange: 7
+  mageBlackholeHeightOffset: 5
+  mageBlackholeRadius: 8
+  mageBlackholeCylinderHalfHeight: 20
+  mageBlackholeVisualRadius: 2.5
+  mageBlackholeSlowMultiplier: 0.7
+  mageBlackholeSlowRefreshDuration: 0.25
+  mageBlackholeTickInterval: 0.1
+  mageBlackholePullSpeed: 2
+  mageTeleportDistance: 6
+  mageTeleportRecastWindow: 0.5
+  mageTeleportMaxCharges: 2
+  mageTeleportPassthroughDuration: 0.15
+  warriorWeaponViewLocalPosition: {x: 0.5, y: -0.2, z: 0.75}
+  warriorWeaponViewLocalEuler: {x: 280, y: 180, z: 90}
+  warriorWeaponViewScale: 0.7
+  archerWeaponViewLocalPosition: {x: 0.52, y: -0.3, z: 0.75}
+  archerWeaponViewLocalEuler: {x: 273, y: 180, z: 185}
+  archerWeaponViewScale: 0.002
+  rogueWeaponViewLocalPosition: {x: 0.5, y: -0.25, z: 0.75}
+  rogueWeaponViewLocalEuler: {x: 70, y: 90, z: 0}
+  rogueWeaponViewScale: 0.2
+  mageWeaponViewLocalPosition: {x: 0.6, y: -0.4, z: 0.7}
+  mageWeaponViewLocalEuler: {x: 10, y: 180, z: 0}
+  mageWeaponViewScale: 0.02
+  debugLiveUpdateWeaponView: 1
   warriorAbility:
     RightClickCooldown: 5
     QCooldown: 8
@@ -184,6 +271,7 @@ MonoBehaviour:
     ECooldown: 14
     RCooldown: 0
     FCooldown: 0
+    ZCooldown: 0
   rogueAbility:
     RightClickCooldown: 12
     QCooldown: 5

@@ -62,10 +62,7 @@ namespace Game.Combat
         // --- R: stealth state
         private bool       _isStealthed   = false;
         private float      _stealthTimer  = 0f;
-        private bool       _isRevealed    = false; // brief visible window when hit while stealthed
-        private float      _revealTimer   = 0f;
         private GameObject _stealthVisual = null;  // faint indicator above head
-        private GameObject _revealVisual  = null;  // bright sphere during reveal window
         private Renderer[] _ownerRenderers;        // cached once; toggled to hide/show character
 
         // --- Static NonAlloc physics buffers
@@ -78,7 +75,6 @@ namespace Game.Combat
         private static Material s_zBombMat;
         private static Material s_riftMat;
         private static Material s_stealthMat;
-        private static Material s_revealMat;
         private static Material s_fSlashMat;
         private static Material s_fSlash3Mat; // step 3: slightly brighter purple to distinguish
 
@@ -94,8 +90,6 @@ namespace Game.Combat
         public float FComboWindowTimer => _fComboWindow;
         public bool  FInComboWindow    => _fCombo == FComboState.Window;
         public float StealthTimer      => _stealthTimer;
-        public bool  IsRevealed        => _isRevealed;
-        public float RevealTimer       => _revealTimer;
         public float F3SpeedTimer      => _fStep3SpeedTimer;
 
         // --- Initialisation
@@ -120,7 +114,6 @@ namespace Game.Combat
                 _basicAttack.OnAttackHit  += OnBasicAttackHit;
                 _basicAttack.OnAttackUsed += OnBasicAttackUsed;
             }
-            ownerHealth.OnDamaged += OnTookDamage;
         }
 
         void OnDestroy()
@@ -130,8 +123,6 @@ namespace Game.Combat
                 _basicAttack.OnAttackHit  -= OnBasicAttackHit;
                 _basicAttack.OnAttackUsed -= OnBasicAttackUsed;
             }
-            if (_ownerHealth != null)
-                _ownerHealth.OnDamaged -= OnTookDamage;
             BreakStealth();
         }
 
@@ -228,13 +219,6 @@ namespace Game.Combat
                     BreakStealth();
             }
 
-            // R: reveal window countdown (hit while stealthed).
-            if (_isRevealed)
-            {
-                _revealTimer = Mathf.Max(0f, _revealTimer - dt);
-                if (_revealTimer <= 0f)
-                    ClearReveal();
-            }
         }
 
         // --- Ability activation (called by AbilityController.TryActivate)
@@ -597,41 +581,6 @@ namespace Game.Combat
                 _ownerRenderers[i].enabled = true;
 
             if (_stealthVisual != null) { Destroy(_stealthVisual); _stealthVisual = null; }
-            ClearReveal(); // also destroys revealVisual if present
-        }
-
-        // Shows character briefly when hit during stealth (1 s reveal window).
-        private void ApplyReveal()
-        {
-            if (!_isStealthed) return;
-            _isRevealed  = true;
-            _revealTimer = _config.rogueStealthRevealOnHitDuration;
-
-            // Re-enable renderers so character is visible during the reveal window.
-            for (int i = 0; i < _ownerRenderers.Length; i++)
-                _ownerRenderers[i].enabled = true;
-
-            // Bright yellow sphere overlay to mark the reveal.
-            if (_revealVisual == null)
-            {
-                _revealVisual = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                _revealVisual.transform.SetParent(_ownerHealth.transform, false);
-                _revealVisual.transform.localPosition = Vector3.up * 1f;
-                _revealVisual.transform.localScale    = Vector3.one * 1.1f;
-                Destroy(_revealVisual.GetComponent<Collider>());
-                _revealVisual.GetComponent<Renderer>().sharedMaterial = GetRevealMat();
-            }
-        }
-
-        // Ends the reveal window; hides character again if still stealthed.
-        private void ClearReveal()
-        {
-            _isRevealed  = false;
-            _revealTimer = 0f;
-            if (_revealVisual != null) { Destroy(_revealVisual); _revealVisual = null; }
-            if (_isStealthed)
-                for (int i = 0; i < _ownerRenderers.Length; i++)
-                    _ownerRenderers[i].enabled = false;
         }
 
         // True when the owner is within the rear cone of the target (backstab eligible).
@@ -675,7 +624,6 @@ namespace Game.Combat
         private void OnBasicAttackUsed() { }
 
         // Damage taken — stealth is NOT broken on hit (new policy).
-        private void OnTookDamage(HealthComponent _) { }
 
         // --- E helpers
 
@@ -913,12 +861,6 @@ namespace Game.Combat
         {
             if (s_stealthMat == null) { s_stealthMat = new Material(Shader.Find("Standard")); s_stealthMat.color = new Color(0.4f, 0f, 0.8f); }
             return s_stealthMat;
-        }
-
-        private static Material GetRevealMat()
-        {
-            if (s_revealMat == null) { s_revealMat = new Material(Shader.Find("Standard")); s_revealMat.color = new Color(1f, 0.9f, 0f); }
-            return s_revealMat;
         }
 
         private static Material GetFSlashMat()

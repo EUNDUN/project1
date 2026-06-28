@@ -157,11 +157,9 @@ namespace Game.Combat
         // Rogue E state -- re-exposed for AbilityDebugUI.
         public bool  RogueIsEFlying    => _rogueHandler?.IsEFlying   ?? false;
 
-        // Rogue R stealth/reveal state -- re-exposed for AbilityDebugUI.
+        // Rogue R stealth state -- re-exposed for AbilityDebugUI.
         public bool  RogueIsStealthed  => _rogueHandler?.IsStealthed ?? false;
         public float RogueStealthTimer => _rogueHandler?.StealthTimer ?? 0f;
-        public bool  RogueIsRevealed   => _rogueHandler?.IsRevealed  ?? false;
-        public float RogueRevealTimer  => _rogueHandler?.RevealTimer  ?? 0f;
 
         void Start()
         {
@@ -302,6 +300,18 @@ namespace Game.Combat
             _dashTimer              = duration;
             _isDashing              = true;
             SetDashPassthrough(true);
+        }
+
+        // Stops the current dash immediately without invoking OnDashEnded handlers.
+        // Only for in-flight collision cancellation (e.g. Warrior RC impact).
+        // The calling handler is responsible for clearing its own per-handler dash state.
+        internal void StopDash()
+        {
+            if (!_isDashing) return;
+            _isDashing              = false;
+            _dashTimer              = 0f;
+            _dashHorizontalVelocity = Vector3.zero;
+            TryClearPassthrough();
         }
 
         // Toggles Physics.IgnoreCollision between the owner and all pre-registered characters.

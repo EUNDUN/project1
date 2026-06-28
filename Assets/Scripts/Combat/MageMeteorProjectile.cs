@@ -106,6 +106,7 @@ namespace Game.Combat
                 });
             }
 
+            for (int i = 0; i < hitCount; i++) s_hcBuf[i] = null;
             Destroy(gameObject);
         }
 

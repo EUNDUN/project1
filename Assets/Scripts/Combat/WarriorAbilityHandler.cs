@@ -36,6 +36,8 @@ namespace Game.Combat
         private static readonly Collider[]        s_buf        = new Collider[16];
         private static readonly HealthComponent[] s_hitCache   = new HealthComponent[16];
         private static readonly RaycastHit[]      s_groundHits = new RaycastHit[4];
+        private static readonly Collider[]        s_rcBuf      = new Collider[8];
+        private static readonly HealthComponent[] s_rcHitCache = new HealthComponent[8];
 
         // Guard (E) state
         private bool       _isGuarding  = false;
@@ -67,6 +69,9 @@ namespace Game.Combat
 
         public bool  IsFCasting => _fState == FState.Casting;
         public float FCastTimer => _config != null ? Mathf.Max(0f, _config.warriorFDuration - _fTimer) : 0f;
+
+        // RC dash impact state — true while warrior is dashing and collision detection is active.
+        private bool _isRCDashing = false;
 
         // R (Great Sword Descent) state — warrior ultimate
         private enum RState { Idle, Casting }
@@ -136,6 +141,10 @@ namespace Game.Combat
                 _selfMoveTimer -= dt;
                 if (_selfMoveTimer <= 0f) { _selfMoveTimer = 0f; _selfMoveVelocity = Vector3.zero; }
             }
+
+            // RC dash: per-frame enemy detection — stops dash and launches enemies on contact.
+            if (_isRCDashing && _ac.IsDashing)
+                CheckRCDashImpact();
 
             // Z timer: wave 2 fires after the configured delay, then Z returns to Idle.
             if (_zState == ZState.Active)
@@ -272,8 +281,8 @@ namespace Game.Combat
             };
         }
 
-        // Called by AbilityController when the shared dash timer ends.
-        public void OnDashEnded() { } // RC dash has no post-dash effects yet
+        // Called by AbilityController when the shared dash timer ends naturally (no impact).
+        public void OnDashEnded() { _isRCDashing = false; }
 
         // On death: fully cancel Q so there is no stale movement, landing detection,
         // or passthrough left active. Q relies on the player's motor and isGrounded;
@@ -282,6 +291,7 @@ namespace Game.Combat
         // local motor, reconsider allowing in-flight strikes to resolve independently.
         public void HandleOwnerDeath()
         {
+            _isRCDashing = false;
             ClearQCast();
             EndGuard();
             ClearZState();
@@ -292,6 +302,7 @@ namespace Game.Combat
         // Called by AbilityController.OnDisable / OnDestroy.
         public void ForceCleanup()
         {
+            _isRCDashing = false;
             ClearQCast();
             EndGuard();
             ClearZState();
@@ -307,6 +318,7 @@ namespace Game.Combat
             if (_rState == RState.Casting) return false; // R ultimate in progress
             if (_qState == QState.Casting) return false; // Q self-move and RC dash must not overlap
             _ac.SetCooldown(AbilitySlot.RightClick, _ac.AbilityConfig.RightClickCooldown);
+            _isRCDashing = true;
             _ac.StartDash(_config.warriorDashDistance, _config.warriorDashDuration);
             return true;
         }
@@ -342,6 +354,55 @@ namespace Game.Combat
                               + Vector3.up * (_config.warriorQRiseHeight  / _config.warriorQRiseDuration);
             _selfMoveTimer = _config.warriorQRiseDuration;
             return true;
+        }
+
+        // Called every TickTimers frame while RC dash is active.
+        // Detects enemies in an overlap sphere around the character torso; on first contact,
+        // stops the dash and launches all enemies in range.
+        private void CheckRCDashImpact()
+        {
+            Vector3 center = _ownerHealth.transform.position + Vector3.up * (_config.standHeight * 0.5f);
+            int count = Physics.OverlapSphereNonAlloc(
+                center, _config.warriorDashImpactRadius, s_rcBuf,
+                _config.attackLayerMask, QueryTriggerInteraction.Ignore);
+
+            int hitCount = 0;
+            for (int i = 0; i < count; i++)
+            {
+                HealthComponent hc = s_rcBuf[i].GetComponent<HealthComponent>();
+                if (hc == null) hc = s_rcBuf[i].GetComponentInParent<HealthComponent>();
+                if (hc == null || hc == _ownerHealth || hc.IsDead) continue;
+                if (hc.Team == _ownerHealth.Team) continue; // allies pass through
+
+                bool dup = false;
+                for (int j = 0; j < hitCount; j++)
+                    if (s_rcHitCache[j] == hc) { dup = true; break; }
+                if (dup || hitCount >= s_rcHitCache.Length) continue;
+
+                s_rcHitCache[hitCount++] = hc;
+            }
+
+            if (hitCount == 0) return;
+
+            // Enemy contact: stop dash, then apply effects to all enemies in range.
+            _isRCDashing = false;
+            _ac.StopDash();
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                HealthComponent hc = s_rcHitCache[i];
+                if (_config.warriorDashImpactDamage > 0f)
+                {
+                    hc.TakeDamage(new DamageInfo
+                    {
+                        BaseDamage = _config.warriorDashImpactDamage,
+                        SourceTeam = _ownerHealth.Team,
+                        SourceId   = string.Empty,
+                    });
+                }
+                hc.ApplyLaunchImpulse(_config.warriorDashImpactLaunchSpeed, _ownerHealth.Team);
+                s_rcHitCache[i] = null; // release reference
+            }
         }
 
         // E — Iron Guard: damage reduction + move speed penalty for warriorGuardDuration.

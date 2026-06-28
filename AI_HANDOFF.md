@@ -8,7 +8,7 @@
 - Engine: Unity 6 Universal 3D
 - Project path: `C:\Users\User\project1`
 - Final goal: 온라인 PvP 1인칭 3D 전투 게임
-- Current phase: **53 완료** — R 스킬 3종 위치/상태 기준 수정. 전사R: 바닥 기준 상승·낙하 + 시전 중 유닛 통과. 도적R: 은신 해제 조건 → 백어택 성공 시만(피격/스킬 사용으로 해제 안 됨). 마법사R: 유성 낙하 중심·경고 위치를 바닥 기준 y로 보정. 이전: **52 완료** — 쿨타임 미적용 4종 수정: 전사Q/R asset 0→정상값, 도적E1 무한발사 방지(ProjectileFlying 상태), 도적E1 방향 3D화, 궁수Q 소비시 쿨타임. 이전: **51.1 완료** — HealthComponent self move speed buff를 source-slotted 구조로 리팩터링. RC×Overdrive 동시 활성 시 곱연산(×1.3×1.5=×1.95) 보장. 이전: **51단계 완료** — Archer R 궁극기 Overdrive 구현. R 발동 시 이동속도 ×1.5(10s), 공격속도 ×2.0(RC와 곱연산). Basic 탄이 OverdriveBasic으로 업그레이드되어 충돌 시 AoE 폭발(반경 2m, 피해 5). 폭발 보상(F게이지+Z쿨감)은 폭발당 1회만. 사망 시 이동속도 버프 정리. AbilityDebugUI R 슬롯: OVR X.Xs(주황)/쿨타임/READY. 이전: **50.1 완료** — Archer Basic 적중 시 Z 쿨타임 0.1s 감소. OnArcherBasicHit(float)가 F 게이지 증가와 Z 쿨감을 하나의 콜백으로 통합. BasicAttackController에서 shotType이 Basic이면 _onBasicHitCallback(OnArcherBasicHit), Q/enhanced면 _addFGaugeCallback(AddArcherFGauge)으로 분기. ReduceCooldown(AbilitySlot, float) AbilityController에 추가. 이전: **50단계 완료** — Archer Z 구르기(Roll) 구현. 입력 방향(WASD) 기준 수평 구르기. 현재 입력 없으면 마지막 이동 입력 방향, 그것도 없으면 뒤로. 8s 쿨타임, 거리 4m, 0.25s 지속. 구르기 성공 시 F 게이지 +10. StartDash(velocity, duration) 재사용으로 유닛 통과 자동 처리. 이전: **49.1 버그픽스 완료** — Archer F 버그 3개 수정 + 시작 게이지 100%. ① TickTimers에서 스턴/사망 시 F 즉시 종료(TickHeldInputs 미호출 케이스 대비). ② Barrage 탄환: TryConsumeShieldFrom을 damage+slow 앞에 호출해 보호막이 공격 이벤트 전체를 차단. ③ Basic탄/Q강화탄: HP 비교로 게이지 충전 판정(무적 대상 제외). ④ Init()에서 _fGauge = config.archerFMaxGauge. 이전: 49단계 완료 — Archer F 게이지형 난사(Barrage Gauge). 기본 공격 적중 +2, Q 강화탄 폭발 적중 +3, F 꾹 누르면 20/s 소모하며 0.1s마다 난사탄 발사(피해 3, 둔화 0.8x 0.4s). F 사용 중 이동속도 80%, 기본 공격 차단. 사망해도 게이지 유지. 이전: 48단계 완료 — Archer Q 구조 정리 + 보호막-강화탄 공격 이벤트 단위 차단. HealthComponent.TryConsumeShieldFrom(Team) 추가 — 강화탄 폭발의 피해+CC를 하나의 공격 이벤트로 묶어 보호막 1회 소모로 전부 차단. ExplodeAt() dedup 이후 damage 이전에 호출. TryBeginQ()에 no-cooldown 의도 명시 (공용 쿨타임 배열 미사용). 이전: 47단계 — Archer Q 강화탄 선택(Shock/Fire/Ice 순환). 이전: 46단계 — Archer 구조 최적화 4개 수정: ① 투사체 사거리 끝 충돌 누락 수정(step=Min(dist,range)), ② 투사체 오브젝트 풀링(s_pool, cap32), ③ SelfMoveSpeedMultiplier buff/penalty 2-레이어 분리, ④ CC 함수에 sourceTeam 추가로 보호막이 적 CC만 차단. 이전: 45단계 — Archer E 선사용 보호막(2.5s, cd14s). 적의 다음 1회 피해 또는 CC(스턴/넉백/슬로우/띄우기) 차단 후 즉시 소멸. HealthComponent에 `_shieldActive` + `ConsumeShield()` + `OnShieldConsumed` 이벤트로 중앙화. 시각: 반투명 cyan 구체 자식 GO (toggle). 이전: 44단계 Archer 투사체 Capsule 블릿 시각 + RC 래피드파이어 버프. 43단계 Archer 기본 투사체. 42단계 Mage 패시브+큰 화염구 스턴/넉백. 41단계 Mage R Meteor Judgment. 40단계 Mage Z Arcane Bolt. 39단계 Mage F 레이저. 38단계 Mage E 블랙홀. 37단계 Mage 화염구. 36단계 Mage RC 텔레포트. 35단계 Warrior R 상승/낙하 이동. 34단계 Warrior R 거검 강림. 33단계 Warrior F 난도질. 32단계 Warrior Z 파동 방향 수정. 31단계 Warrior Z 반격 후퇴기. 30단계 DamageTakenMultiplier. 29단계 Rogue Q 장판. 24단계 Rogue R 은신/백어택.
+- Current phase: **55 완료** — 도적R reveal 잔여 코드 전량 제거 + 마법사R 유성 개별 impact 바닥 기준 Y 보정. 이전: **54 완료** — 전사 RC 대시: 충돌 시 중단 + 공중 띄우기. WarriorAbilityHandler._isRCDashing 상태 추적, 매 프레임 OverlapSphereNonAlloc으로 적 탐지, AbilityController.StopDash() 추가. 이전: **53 완료** — R 스킬 3종 위치/상태 기준 수정. 전사R: 바닥 기준 상승·낙하 + 시전 중 유닛 통과. 도적R: 은신 해제 조건 → 백어택 성공 시만(피격/스킬 사용으로 해제 안 됨). 마법사R: 유성 낙하 중심·경고 위치를 바닥 기준 y로 보정. 이전: **52 완료** — 쿨타임 미적용 4종 수정: 전사Q/R asset 0→정상값, 도적E1 무한발사 방지(ProjectileFlying 상태), 도적E1 방향 3D화, 궁수Q 소비시 쿨타임. 이전: **51.1 완료** — HealthComponent self move speed buff를 source-slotted 구조로 리팩터링. RC×Overdrive 동시 활성 시 곱연산(×1.3×1.5=×1.95) 보장. 이전: **51단계 완료** — Archer R 궁극기 Overdrive 구현. R 발동 시 이동속도 ×1.5(10s), 공격속도 ×2.0(RC와 곱연산). Basic 탄이 OverdriveBasic으로 업그레이드되어 충돌 시 AoE 폭발(반경 2m, 피해 5). 폭발 보상(F게이지+Z쿨감)은 폭발당 1회만. 사망 시 이동속도 버프 정리. AbilityDebugUI R 슬롯: OVR X.Xs(주황)/쿨타임/READY. 이전: **50.1 완료** — Archer Basic 적중 시 Z 쿨타임 0.1s 감소. OnArcherBasicHit(float)가 F 게이지 증가와 Z 쿨감을 하나의 콜백으로 통합. BasicAttackController에서 shotType이 Basic이면 _onBasicHitCallback(OnArcherBasicHit), Q/enhanced면 _addFGaugeCallback(AddArcherFGauge)으로 분기. ReduceCooldown(AbilitySlot, float) AbilityController에 추가. 이전: **50단계 완료** — Archer Z 구르기(Roll) 구현. 입력 방향(WASD) 기준 수평 구르기. 현재 입력 없으면 마지막 이동 입력 방향, 그것도 없으면 뒤로. 8s 쿨타임, 거리 4m, 0.25s 지속. 구르기 성공 시 F 게이지 +10. StartDash(velocity, duration) 재사용으로 유닛 통과 자동 처리. 이전: **49.1 버그픽스 완료** — Archer F 버그 3개 수정 + 시작 게이지 100%. ① TickTimers에서 스턴/사망 시 F 즉시 종료(TickHeldInputs 미호출 케이스 대비). ② Barrage 탄환: TryConsumeShieldFrom을 damage+slow 앞에 호출해 보호막이 공격 이벤트 전체를 차단. ③ Basic탄/Q강화탄: HP 비교로 게이지 충전 판정(무적 대상 제외). ④ Init()에서 _fGauge = config.archerFMaxGauge. 이전: 49단계 완료 — Archer F 게이지형 난사(Barrage Gauge). 기본 공격 적중 +2, Q 강화탄 폭발 적중 +3, F 꾹 누르면 20/s 소모하며 0.1s마다 난사탄 발사(피해 3, 둔화 0.8x 0.4s). F 사용 중 이동속도 80%, 기본 공격 차단. 사망해도 게이지 유지. 이전: 48단계 완료 — Archer Q 구조 정리 + 보호막-강화탄 공격 이벤트 단위 차단. HealthComponent.TryConsumeShieldFrom(Team) 추가 — 강화탄 폭발의 피해+CC를 하나의 공격 이벤트로 묶어 보호막 1회 소모로 전부 차단. ExplodeAt() dedup 이후 damage 이전에 호출. TryBeginQ()에 no-cooldown 의도 명시 (공용 쿨타임 배열 미사용). 이전: 47단계 — Archer Q 강화탄 선택(Shock/Fire/Ice 순환). 이전: 46단계 — Archer 구조 최적화 4개 수정: ① 투사체 사거리 끝 충돌 누락 수정(step=Min(dist,range)), ② 투사체 오브젝트 풀링(s_pool, cap32), ③ SelfMoveSpeedMultiplier buff/penalty 2-레이어 분리, ④ CC 함수에 sourceTeam 추가로 보호막이 적 CC만 차단. 이전: 45단계 — Archer E 선사용 보호막(2.5s, cd14s). 적의 다음 1회 피해 또는 CC(스턴/넉백/슬로우/띄우기) 차단 후 즉시 소멸. HealthComponent에 `_shieldActive` + `ConsumeShield()` + `OnShieldConsumed` 이벤트로 중앙화. 시각: 반투명 cyan 구체 자식 GO (toggle). 이전: 44단계 Archer 투사체 Capsule 블릿 시각 + RC 래피드파이어 버프. 43단계 Archer 기본 투사체. 42단계 Mage 패시브+큰 화염구 스턴/넉백. 41단계 Mage R Meteor Judgment. 40단계 Mage Z Arcane Bolt. 39단계 Mage F 레이저. 38단계 Mage E 블랙홀. 37단계 Mage 화염구. 36단계 Mage RC 텔레포트. 35단계 Warrior R 상승/낙하 이동. 34단계 Warrior R 거검 강림. 33단계 Warrior F 난도질. 32단계 Warrior Z 파동 방향 수정. 31단계 Warrior Z 반격 후퇴기. 30단계 DamageTakenMultiplier. 29단계 Rogue Q 장판. 24단계 Rogue R 은신/백어택.
 - Current network status: 실제 네트워크 구현 전. 멀티플레이 전환을 고려한 구조로 설계됨.
 
 ## Current Rules
@@ -58,6 +58,114 @@ Assets/
 ```
 
 ## Design Notes
+
+### 도적R reveal 코드 제거 + 마법사R 유성 개별 impact 바닥 보정 — 55단계 (2026-06-28)
+
+```
+수정 1 — 도적R reveal 잔여 코드 전량 제거
+
+제거 항목:
+  RogueAbilityHandler:
+    _isRevealed, _revealTimer, _revealVisual, s_revealMat 필드
+    IsRevealed, RevealTimer public property
+    ownerHealth.OnDamaged += OnTookDamage (Init)
+    _ownerHealth.OnDamaged -= OnTookDamage (OnDestroy)
+    TickTimers reveal 타이머 블록
+    BreakStealth() 내 ClearReveal() 호출
+    ApplyReveal(), ClearReveal(), OnTookDamage(), GetRevealMat() 메서드
+  AbilityController:
+    RogueIsRevealed, RogueRevealTimer property
+  GameConfig.cs + GameConfig.asset:
+    rogueStealthRevealOnHitDuration (더 이상 참조 없음)
+
+유지:
+  은신 해제 조건 — 백어택 성공 시만 (OnBasicAttackHit 내 BreakStealth)
+  은신 5초 만료 시 BreakStealth (TickTimers 내 _stealthTimer 카운트다운)
+  사망/ForceCleanup 시 BreakStealth 호출
+  피격·스킬 사용 시 은신 유지 (OnTookDamage, OnBasicAttackUsed 이벤트 핸들러 없음)
+
+수정 2 — 마법사R 유성 개별 impact 바닥 기준 Y 보정
+
+변경 파일: MageMeteorStorm.cs
+  추가: static RaycastHit[] s_groundHits = new RaycastHit[4]
+  SpawnMeteor() 내 impactPos 계산 후 TryFindGroundY() 호출 → impactPos.y 보정
+  추가: TryFindGroundY(Vector3, out float) — 20m 위에서 하향 RaycastNonAlloc(40m),
+        HealthComponent 콜라이더는 ground로 취급 안 함, 가장 가까운 hit.point.y 반환.
+        바닥 미발견 시 xzPos.y fallback.
+
+보정 범위:
+  MageAbilityHandler: stormCenter Y (기존 유지)
+  MageMeteorStorm: 개별 meteor impactPos Y (신규)
+  MageMeteorProjectile: impactPos 그대로 수신 → 경고 표시·낙하·폭발 모두 보정값 사용
+
+테스트:
+  [도적R] R 사용 → 피격되어도 은신/비가시 유지
+  [도적R] R 사용 → 스킬 사용해도 은신 유지
+  [도적R] 은신 중 백어택 성공 → 은신 해제, 보너스 피해
+  [도적R] 5초 종료 → 은신 해제
+  [도적R] reveal UI/노란 구체 없음, 콘솔 에러 없음
+  [마법사R] 평지 유성 — 기존 동작과 동일
+  [마법사R] 높낮이 있는 지형 — 각 유성 impactPos Y가 실제 바닥 높이에 맞음
+  [마법사R] 유성 경고(빨간 원)·낙하·폭발 모두 동일한 impactPos 기준
+  콘솔 에러 없음
+```
+
+### 전사 RC 대시 충돌 중단 + 공중 띄우기 — 54단계 (2026-06-28)
+
+```
+목표:
+  전사 우클릭 대시 중 전방 적 캐릭터에 닿으면 대시를 즉시 중단하고 적을 공중에 띄운다.
+  아군에게는 반응 없음. 벽은 CharacterController가 기존처럼 막음.
+
+구조:
+  _isRCDashing (WarriorAbilityHandler): RC 대시 진행 중임을 추적하는 bool.
+  TryRCDash(): _isRCDashing = true 후 _ac.StartDash(). passthrough 유지(적 통과).
+  OnDashEnded(): 정상 완료 시 _isRCDashing = false.
+  HandleOwnerDeath / ForceCleanup: _isRCDashing = false.
+
+  TickTimers(): _isRCDashing && _ac.IsDashing → CheckRCDashImpact() 호출.
+  CheckRCDashImpact():
+    OverlapSphereNonAlloc(torsoCenter, warriorDashImpactRadius, s_rcBuf, attackLayerMask)
+    → 자신/아군/사망 제외, 중복 제거
+    → hitCount > 0이면: _isRCDashing = false → _ac.StopDash()
+    → 각 적: TakeDamage(warriorDashImpactDamage > 0 일 때만) + ApplyLaunchImpulse(warriorDashImpactLaunchSpeed)
+
+  AbilityController.StopDash():
+    _isDashing = false, _dashTimer = 0, _dashHorizontalVelocity = Vector3.zero, TryClearPassthrough()
+    OnDashEnded()는 호출하지 않음 — 호출 핸들러가 자체 상태 정리.
+
+유닛 통과 정책:
+  RC 대시는 기존처럼 SetDashPassthrough(true) 유지 → CharacterController는 물리 충돌 없음.
+  충돌 판정은 NonAlloc OverlapSphere로 논리적으로 감지 → 적 감지 시 대시 속도를 0으로 설정.
+  결과: 아군과 충돌 없음, 적과 겹치는 위치에서 시각적으로 멈춤.
+
+변경 파일:
+  GameConfig.cs    — warriorDashImpactRadius/LaunchSpeed/Damage 3개 필드 추가
+  GameConfig.asset — 직렬화 값 3개 추가
+  AbilityController.cs — StopDash() internal 메서드 추가
+  WarriorAbilityHandler.cs:
+    s_rcBuf[8] / s_rcHitCache[8] 정적 버퍼
+    _isRCDashing bool 필드
+    TryRCDash → _isRCDashing = true
+    OnDashEnded → _isRCDashing = false
+    HandleOwnerDeath / ForceCleanup → _isRCDashing = false
+    TickTimers → CheckRCDashImpact() 조건부 호출
+    CheckRCDashImpact() 메서드 신규
+
+수치 (GameConfig):
+  warriorDashImpactRadius      = 1.2m
+  warriorDashImpactLaunchSpeed = 6.0m/s
+  warriorDashImpactDamage      = 0 (충돌 피해 없음, 띄우기만)
+
+테스트:
+  1. 전사 RC → 바로 앞 적에게 닿으면 대시 즉시 중단 + 적 공중 띄우기
+  2. RC → 적이 없으면 최대 거리(20m)/시간(0.5s)까지 정상 대시
+  3. RC → 아군에게 닿아도 대시 계속, 피해/띄우기 없음
+  4. RC → 벽에 막혀도 _isRCDashing 남지 않음 (타이머 만료 → OnDashEnded → false)
+  5. RC 대시 중 사망 → _isRCDashing = false, passthrough 해제
+  6. Q/R/Z/F 기존 동작 이상 없음
+  7. 콘솔 에러 없음
+```
 
 ### R 스킬 3종 위치/상태 기준 수정 — 53단계 (2026-06-27)
 
@@ -2012,3 +2120,74 @@ AbilityController.TryClearPassthrough 조건:
 - **cc.Move 단일 호출**: FirstPersonMotor.Tick 내부에서만.
 - 수치는 반드시 `GameConfig`에서 관리한다.
 - 작업 후 `Last Completed`, `In Progress`, `Next Task`, `Known Issues`, `Do Not Do Yet`을 갱신한다.
+## 2026-06-28 - First-person weapon view
+
+Changed:
+- Added `Assets/Scripts/Visuals/FirstPersonWeaponView.cs` as a local visual-only weapon layer.
+- Wired it from `GameBootstrap` after local player input object creation.
+- Added `GameConfig` tuning fields for first-person weapon local position, local rotation, and per-class view scale.
+- Added runtime-loadable weapon copies under `Assets/Resources/Weapons` while keeping source imports in `Assets/Models/Weapons`.
+
+Notes:
+- This layer does not affect combat, physics, targeting, damage, or networking rules.
+- Colliders on loaded weapon models are disabled immediately so imported art cannot block movement or hit detection.
+- If a model is invisible or too large, tune the `Visual - First Person Weapon` values in `GameConfig` first.
+## 2026-06-28 - Per-class first-person weapon transform
+
+Changed:
+- Replaced shared first-person weapon local position/euler with per-class position/euler/scale fields in `GameConfig`.
+- `FirstPersonWeaponView` now selects local transform by `CombatClass`, while keeping combat/physics/network rules untouched.
+## 2026-06-28 - Live weapon view tuning
+
+Changed:
+- Added `debugLiveUpdateWeaponView` to `GameConfig`.
+- `FirstPersonWeaponView` now reapplies first-person weapon position/euler/scale during Play Mode when that debug flag is enabled.
+- Removed Vector3.zero fallback for configured position/euler, so `0,0,0` is a valid editable value.
+## 2026-06-28 - Minecraft-style weapon view motion
+
+Changed:
+- Added `WeaponMotionRoot` under `WeaponViewRoot` in `FirstPersonWeaponView`.
+- Added local-only idle bob, movement bob, look sway, and click swing motion.
+- Added `Visual - First Person Weapon Motion` tuning fields in `GameConfig`.
+
+Notes:
+- This is client-only presentation. It does not affect combat, targeting, physics, cooldowns, or future server-authoritative PvP.
+- Swing starts on every left-click input, including cooldown clicks, matching the desired visual feedback rule.
+## 2026-06-28 - Archer gun recoil and camera bob
+
+Changed:
+- Archer first-person attack motion now uses short gun recoil instead of melee swing.
+- Non-archer classes keep Minecraft-like melee swing.
+- Added camera view bob/roll while moving to express character walking, similar to Minecraft/Sudden Attack style.
+- Added recoil and camera bob tuning fields to `GameConfig` under `Visual - First Person Weapon Motion`.
+
+Notes:
+- Camera bob is local presentation only and is removed/reapplied each frame to avoid permanent drift.
+- This still does not affect damage, aim resolver data, physics, cooldowns, or server-authoritative PvP structure.
+## 2026-06-28 - Removed invalid signature packages
+
+Changed:
+- Removed direct dependencies from `Packages/manifest.json` and `Packages/packages-lock.json`:
+  - `com.unity.ai.navigation`
+  - `com.unity.cinemachine`
+  - `com.unity.nuget.newtonsoft-json`
+
+Reason:
+- Unity Package Manager reported invalid signatures for these packages after Asset Store import/update.
+- Current project gameplay code does not reference NavMesh, Cinemachine, or Newtonsoft APIs.
+- If a future imported character/demo scene requires one of them, re-add intentionally from Package Manager after the signature issue is resolved.
+
+## 2026-06-28 - Character asset import registry
+
+Changed:
+- Added `Assets/Art/References/Characters/README_CHARACTER_ASSETS.md` to record imported character asset locations without moving package internals.
+
+Imported candidates:
+- Warrior visual candidate: `Assets/Sky_Protective_suit/Prefab/sky_protectiv_suit_rig_UNITY.prefab`
+- Archer visual candidate: `Assets/UnityTechnologies/SpaceRobotKyle/Prefabs/RobotKyle.prefab`
+- Rogue visual candidate: `Assets/o3n/o3nBaseUMARaces/Races/o3nMaleRace/Prefabs/o3nMaleDynamicCharacterAvatar.prefab` or temporary capsule if UMA is too heavy.
+- Mage visual candidate: `Assets/o3n/o3nBaseUMARaces/Races/o3nFemaleRace/Prefabs/o3nFemaleDynamicCharacterAvatar.prefab` or temporary capsule if UMA is too heavy.
+
+Notes:
+- Do not move imported Asset Store package internals yet. Use prefab variants or a dedicated visual wrapper later.
+- Character art must remain visual-only. Gameplay collision stays on the existing CharacterController/Health/Team/Ability structure.

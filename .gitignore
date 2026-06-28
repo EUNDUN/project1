@@ -51,3 +51,6 @@ sysinfo.txt
 *.unitypackage
 
 # Keep Unity source assets, scenes, packages, and project settings tracked.
+
+# Local disabled/imported asset backups
+/_DisabledAssets/

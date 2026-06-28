@@ -9,6 +9,7 @@ using Game.Combat;
 using Game.GameState;
 using Game.Bot;
 using Game.UI;
+using Game.Visuals;
 
 namespace Game
 {
@@ -126,6 +127,11 @@ namespace Game
             // --- LocalPlayer: input + camera (no physics) ---
             GameObject localPlayerGo = new GameObject("LocalPlayer");
             localPlayerGo.AddComponent<PlayerInputReader>();
+
+            FirstPersonWeaponView weaponView = localPlayerGo.AddComponent<FirstPersonWeaponView>();
+            weaponView.config = config;
+            weaponView.ownerHealth = playerHealth;
+            weaponView.cameraTransform = camGo.transform;
 
             FirstPersonCamera fpsCamera = localPlayerGo.AddComponent<FirstPersonCamera>();
             fpsCamera.config = config;
